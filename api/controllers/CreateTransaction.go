@@ -1,14 +1,33 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"time"
+
+	"github.com/ArchishmanSengupta/expense-tracker/api/models"
 )
 
 func CreateTransaction(w http.ResponseWriter, r *http.Request) {
-	// Get the body of our POST request
-	// return the string response containing the request body
-	reqBody, _ := ioutil.ReadAll(r.Body)
-	fmt.Fprintf(w, "%+v", string(reqBody))
+
+	transactionInstance := models.Transaction{}
+
+	json.NewDecoder(r.Body).Decode(&transactionInstance)
+
+	transactionInstance.CreatedAt = time.Now()
+	transactionInstance.UpdatedAt = time.Now()
+
+	transaction, err := models.CreateTransaction(&transactionInstance)
+
+	//Error Handling
+	if err != nil {
+		fmt.Println("Error found", err)
+	}
+	//content type
+	w.Header().Set("Content-Type", "application/json")
+
+	//encode
+	json.NewEncoder(w).Encode(transaction)
+
 }
