@@ -35,7 +35,7 @@ func GetAllTransactions(transaction *Transaction) ([]Transaction, error) {
 
 func GetByUuid(transaction *Transaction, uuid string) (*Transaction, error) {
 	// execute the query
-	err := cmd.DbConn.Select(transaction, "SELECT * FROM transaction WHERE Uuid = $1 LIMIT 1", uuid)
+	err := cmd.DbConn.Get(transaction, "SELECT * FROM transaction WHERE Uuid = $1 LIMIT 1", uuid)
 
 	// if an error is found, return it
 	if err != nil {
@@ -56,8 +56,7 @@ func (transaction *Transaction) Retrieve(uuid string) (*Transaction, error) {
 
 	return txn[0], err
 }
-
-func CreateTransaction(transaction *Transaction) (*Transaction, error) {
+func (transaction *Transaction) Insert() (*Transaction, error) {
 GenerateNewUUID:
 	uuid := utils.CreateNewUUID()
 
@@ -67,7 +66,10 @@ GenerateNewUUID:
 	}
 
 	transaction.Uuid = uuid
+	transaction.CreatedAt = time.Now()
+	transaction.UpdatedAt = time.Now()
 
+	fmt.Println("Transaction------->", transaction)
 	insertQuery := `INSERT INTO transaction (Uuid, Type, Amount, CreatedAt, UpdatedAt) VALUES (:Uuid, :Type, :Amount, :CreatedAt, :UpdatedAt)`
 
 	// execute the insert query
@@ -75,7 +77,7 @@ GenerateNewUUID:
 
 	// if an error is found, return it
 	if err != nil {
-		fmt.Println("Error found", err)
+		fmt.Println("Error found while Inserting---->", err)
 	}
 
 	txn, err := GetByUuid(transaction, uuid)

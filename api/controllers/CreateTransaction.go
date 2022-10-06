@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/ArchishmanSengupta/expense-tracker/api/models"
 )
@@ -15,14 +14,14 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&transactionInstance)
 
-	transactionInstance.CreatedAt = time.Now()
-	transactionInstance.UpdatedAt = time.Now()
+	// transactionInstance.CreatedAt = time.Now()
+	// transactionInstance.UpdatedAt = time.Now()
 
-	transaction, err := models.CreateTransaction(&transactionInstance)
+	transaction, err := transactionInstance.Insert()
 
 	//Error Handling
 	if err != nil {
-		fmt.Println("Error found", err)
+		fmt.Println("Error found while", err)
 	}
 	//content type
 	w.Header().Set("Content-Type", "application/json")
