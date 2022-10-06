@@ -14,14 +14,11 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&transactionInstance)
 
-	// transactionInstance.CreatedAt = time.Now()
-	// transactionInstance.UpdatedAt = time.Now()
-
 	transaction, err := transactionInstance.Insert()
 
 	//Error Handling
 	if err != nil {
-		fmt.Println("Error found while", err)
+		fmt.Println("Error found in Controller of CreateTransaction---->", err)
 	}
 	//content type
 	w.Header().Set("Content-Type", "application/json")

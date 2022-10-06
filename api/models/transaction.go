@@ -35,31 +35,26 @@ func GetAllTransactions(transaction *Transaction) ([]Transaction, error) {
 
 func GetByUuid(transaction *Transaction, uuid string) (*Transaction, error) {
 	// execute the query
-	err := cmd.DbConn.Get(transaction, "SELECT * FROM transaction WHERE Uuid = $1 LIMIT 1", uuid)
+	query := `SELECT * FROM transaction WHERE Uuid = '%s';`
+
+	testing := fmt.Sprintf(query, uuid)
+
+	// fmt.Println("Testing---->", testing)
+
+	err := cmd.DbConn.Get(transaction, testing)
 
 	// if an error is found, return it
 	if err != nil {
-		fmt.Println("Error found", err)
+		fmt.Println("Error found in GetByUuid Model---->", err)
 	}
 
 	return transaction, err
 }
-func (transaction *Transaction) Retrieve(uuid string) (*Transaction, error) {
-	txn := make([]*Transaction, 0)
-	// execute the query
-	err := cmd.DbConn.Select(&txn, "SELECT * FROM transaction WHERE Uuid = $1 LIMIT 1", uuid)
 
-	// if an error is found, return it
-	if err != nil {
-		fmt.Println("Error found", err)
-	}
-
-	return txn[0], err
-}
 func (transaction *Transaction) Insert() (*Transaction, error) {
 GenerateNewUUID:
 	uuid := utils.CreateNewUUID()
-
+	// fmt.Println(transaction)
 	_, err := GetByUuid(transaction, uuid)
 	if err == nil {
 		goto GenerateNewUUID
@@ -83,9 +78,22 @@ GenerateNewUUID:
 	txn, err := GetByUuid(transaction, uuid)
 
 	if err != nil {
+		fmt.Println("Error getting transaction by uuid----->", err)
 		return nil, err
 	}
 	return txn, nil
+}
+func (transaction *Transaction) Retrieve(uuid string) (*Transaction, error) {
+	txn := make([]*Transaction, 0)
+	// execute the query
+	err := cmd.DbConn.Select(&txn, "SELECT * FROM transaction WHERE Uuid = $1 LIMIT 1", uuid)
+
+	// if an error is found, return it
+	if err != nil {
+		fmt.Println("Error found", err)
+	}
+
+	return txn[0], err
 }
 
 func Retrieve(transaction *Transaction, uuid string) (*Transaction, error) {
