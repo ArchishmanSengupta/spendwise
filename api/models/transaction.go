@@ -35,13 +35,13 @@ func GetAllTransactions(transaction *Transaction) ([]Transaction, error) {
 
 func GetByUuid(transaction *Transaction, uuid string) (*Transaction, error) {
 	// execute the query
-	query := `SELECT * FROM transaction WHERE Uuid = '%s';`
+	query := `SELECT * FROM transaction WHERE Uuid = $1`
 
-	testing := fmt.Sprintf(query, uuid)
+	// testing := fmt.Sprintf(query, uuid)
 
 	// fmt.Println("Testing---->", testing)
 
-	err := cmd.DbConn.Get(transaction, testing)
+	err := cmd.DbConn.Get(transaction, query, uuid)
 
 	// if an error is found, return it
 	if err != nil {
