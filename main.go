@@ -18,7 +18,7 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	dbConn, _ := cmd.Connect()
+	dbConn, _ := cmd.Connect() // TODO: Error handling here
 
 	cmd.DbConn = dbConn
 

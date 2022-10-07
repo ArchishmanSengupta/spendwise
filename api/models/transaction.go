@@ -33,7 +33,7 @@ func GetAllTransactions(transaction *Transaction) ([]Transaction, error) {
 	return transactions, nil
 }
 
-func GetByUuid(transaction *Transaction, uuid string) (*Transaction, error) {
+func (transaction *Transaction) GetByUuid(uuid string) (*Transaction, error) {
 	// execute the query
 	query := `SELECT * FROM transaction WHERE Uuid = $1`
 
@@ -55,7 +55,11 @@ func (transaction *Transaction) Insert() (*Transaction, error) {
 GenerateNewUUID:
 	uuid := utils.CreateNewUUID()
 	// fmt.Println(transaction)
-	_, err := GetByUuid(transaction, uuid)
+
+	transactionInstance := Transaction{}
+
+	txn, err := transactionInstance.GetByUuid(uuid)
+
 	if err == nil {
 		goto GenerateNewUUID
 	}
@@ -75,7 +79,7 @@ GenerateNewUUID:
 		fmt.Println("Error found while Inserting---->", err)
 	}
 
-	txn, err := GetByUuid(transaction, uuid)
+	// txn, err := transactionInstance.GetByUuid(uuid)
 
 	if err != nil {
 		fmt.Println("Error getting transaction by uuid----->", err)
