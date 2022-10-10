@@ -15,19 +15,22 @@ func GenerateQueryWhereClause(attributeMap map[string]interface{}) (string, erro
 	if len(attributeMap) == 0 {
 		return "", errors.New("empty attribute map")
 	}
-
+	creditOrDebit := attributeMap["type"]
+	date := attributeMap["date"]
+	paramCount := 0
 	condition := ""
-	for key, value := range attributeMap {
-		if len(attributeMap) == 1 {
-			// Check if the value is string int or slice and construct the query accordingly.
-			condition = condition + fmt.Sprintf(`%s = '%v'`, key, value)
-			delete(attributeMap, key)
 
-		} else {
-			// If there are more than one attribute in the map, then we need to add AND
-			condition = condition + fmt.Sprintf(`%s = '%v' AND `, key, value)
-			delete(attributeMap, key)
+	if creditOrDebit != nil {
+		condition = condition + fmt.Sprintf(`type = '%s' `, creditOrDebit)
+		paramCount++
+	}
+
+	if date != nil {
+		and := ""
+		if paramCount > 0 {
+			and = "AND"
 		}
+		condition = condition + and + fmt.Sprintf(`DATE(created_at)='%s'`, date)
 	}
 	whereClause := fmt.Sprintf(`WHERE %s`, condition)
 	return whereClause, nil

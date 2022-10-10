@@ -7,28 +7,31 @@ import (
 
 	"github.com/ArchishmanSengupta/expense-tracker/api/models"
 	"github.com/ArchishmanSengupta/expense-tracker/api/serializers"
+	"github.com/ArchishmanSengupta/expense-tracker/utils"
 )
 
 func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 
 	transactionInstance := models.Transaction{}
-
 	json.NewDecoder(r.Body).Decode(&transactionInstance)
 
 	if transactionInstance.Amount < 0 {
 		fmt.Println("Amount cannot be negative")
 		return
 	}
+
 	transaction, err := transactionInstance.Insert()
 
-	//Error Handling
 	if err != nil {
-		fmt.Println("Error found in Controller of CreateTransaction---->", err)
+		if err == utils.ErrResourceNotFound {
+			utils.SendError(w, err, http.StatusNotFound)
+		} else {
+			utils.SendError(w, err, http.StatusInternalServerError)
+		}
+		return
 	}
-	//content type
-	w.Header().Set("Content-Type", "application/json")
 
-	// Transaction data Serialization
+	w.Header().Set("Content-Type", "application/json")
 	transactionSerializer := serializers.TransactionSerializer{
 		Transactions: []*models.Transaction{transaction},
 		Many:         false,

@@ -2,9 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/ArchishmanSengupta/expense-tracker/api/models"
 	"github.com/ArchishmanSengupta/expense-tracker/api/serializers"
@@ -15,7 +13,7 @@ func GetAllTransactions(w http.ResponseWriter, r *http.Request) {
 	transactionInstance := models.Transaction{}
 
 	typeFromTheUrl := r.URL.Query().Get("type")     //check if type is empty
-	DateFromTheUrl := r.URL.Query().Get("date")     //check if type is empty
+	dateFromTheUrl := r.URL.Query().Get("date")     //check if type is empty
 	amountFromTheUrl := r.URL.Query().Get("amount") //check if type is empty
 
 	attributeMap := make(map[string]interface{}, 0)
@@ -23,29 +21,27 @@ func GetAllTransactions(w http.ResponseWriter, r *http.Request) {
 	var filter bool = false
 
 	if typeFromTheUrl != "" {
-		attributeMap["type"] = typeFromTheUrl
 		filter = true
 	}
 
 	if amountFromTheUrl != "" {
-		attributeMap["amount"] = amountFromTheUrl
 		filter = true
 	}
 
-	if DateFromTheUrl != "" {
-		currentTime := time.Now().String()
-		DateFromTheUrl = currentTime[:10]
-		fmt.Println("DateFromTheUrl--->", DateFromTheUrl)
-		attributeMap["date"] = DateFromTheUrl
+	if dateFromTheUrl != "" {
 		filter = true
 	}
+	attributeMap["type"] = typeFromTheUrl
+	attributeMap["date"] = dateFromTheUrl
+	attributeMap["amount"] = amountFromTheUrl
+
 	var transactions []*models.Transaction
 	var err error
 	dbConn := cmd.DbConn
 	if filter {
 		transactions, err = transactionInstance.Filter(dbConn, attributeMap)
 	} else {
-		transactions, err = transactionInstance.GetAllTransactions(typeFromTheUrl, amountFromTheUrl)
+		transactions, err = transactionInstance.GetAllTransactions(typeFromTheUrl, dateFromTheUrl)
 	}
 
 	if err != nil {

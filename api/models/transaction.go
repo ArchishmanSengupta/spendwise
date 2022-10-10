@@ -92,6 +92,7 @@ func (t *Transaction) Retrieve(db *sqlx.DB, attributeMap map[string]interface{})
 * * This Insert Method creates a record in the transaction table
 * @receiver t
 * ? do i need to check the validity of the transaction before inserting it into the database
+* ? as it may corrupt the DB
 * @param none
 * @return created *Transaction, an error if any
  */
