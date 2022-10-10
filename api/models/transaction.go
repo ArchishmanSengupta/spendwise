@@ -1,151 +1,220 @@
+/**
+* This file holds the logic for the transaction table
+ */
+
 package models
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/ArchishmanSengupta/expense-tracker/cmd"
 	"github.com/ArchishmanSengupta/expense-tracker/utils"
+	"github.com/jmoiron/sqlx"
 )
 
 /*
-Structure of the Transaction model
+* Transaction Structure of the Transaction model
+@struct
+@field ID
+@field Uuid
+@field Amount
+@field Type
+@field CreatedAt
+@field UpdatedAt
 */
 type Transaction struct {
-	ID        int       `db:"ID" json:"id"`
-	Uuid      string    `db:"Uuid" json:"uuid"`
-	Amount    int64     `db:"Amount" json:"amount"`
-	Type      string    `db:"Type" json:"type"`
-	CreatedAt time.Time `db:"CreatedAt" json:"createdAt"`
-	UpdatedAt time.Time `db:"UpdatedAt" json:"updatedAt"`
+	ID        int       `db:"id" json:"id"`
+	Uuid      string    `db:"uuid" json:"uuid"`
+	Amount    int64     `db:"amount" json:"amount"`
+	Type      string    `db:"type" json:"type"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
 
-func GetAllTransactions(transaction *Transaction) ([]Transaction, error) {
-	transactions := make([]Transaction, 0)
+/*
+* This function returns all the transactions in the ElephantSQL database
+
+@receiver t
+* @param typeFromTheUrl
+* @param dateFromTheUrl
+@return []*Transaction
+@return error
+*/
+func (t *Transaction) GetAllTransactions(typeFromTheUrl string, dateFromTheUrl string) ([]*Transaction, error) {
+	transactions := make([]*Transaction, 0)
 
 	// execute the select query
-	err := cmd.DbConn.Select(&transactions, "SELECT * FROM transaction")
+	err := cmd.DbConn.Select(&transactions, "SELECT amount,type,created_at, updated_at FROM transaction")
 
 	// if an error is found, return that error
 	if err != nil {
-		return nil, err
+		fmt.Printf("Error found in GetAllTransactions----->\n", err)
 	}
 	return transactions, nil
 }
 
-func (transaction *Transaction) GetByUuid(uuid string) (*Transaction, error) {
-	// execute the query
-	query := `SELECT * FROM transaction WHERE Uuid = $1`
+// Retrieve
+//  @receiver t
+//  @param db
+//  @param attributeMap
+//  @return *Transaction
+//  @return error
 
-	// testing := fmt.Sprintf(query, uuid)
+func (t *Transaction) Retrieve(db *sqlx.DB, attributeMap map[string]interface{}) (*Transaction, error) {
 
-	// fmt.Println("Testing---->", testing)
-
-	err := cmd.DbConn.Get(transaction, query, uuid)
-
-	// if an error is found, return it
-	if err != nil {
-		fmt.Println("Error found in GetByUuid Model---->", err)
+	query := "SELECT amount, type, created_at, updated_at FROM transaction"
+	// Check for id or uuid in the attributeMap and construct the WHERE clause
+	whereClause := ""
+	if id, ok := attributeMap["id"]; ok {
+		whereClause = fmt.Sprintf("WHERE id='%d'", id)
+	} else if uuid, ok := attributeMap["uuid"]; ok {
+		whereClause = fmt.Sprintf("WHERE uuid='%s'", uuid)
 	}
 
-	return transaction, err
+	// Append the WHERE clause to the query
+	query = fmt.Sprintf(query, whereClause)
+
+	// Execute Get operation on the scan table
+	err := db.Get(t, query)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, utils.ErrResourceNotFound
+		}
+		return nil, err
+	}
+
+	return t, nil
 }
 
-func (transaction *Transaction) Insert() (*Transaction, error) {
+/**
+* * This Insert Method creates a record in the transaction table
+* @receiver t
+* ? do i need to check the validity of the transaction before inserting it into the database
+* @param none
+* @return created *Transaction, an error if any
+ */
+func (t *Transaction) Insert() (*Transaction, error) {
 GenerateNewUUID:
 	uuid := utils.CreateNewUUID()
-	// fmt.Println(transaction)
-
 	transactionInstance := Transaction{}
-
-	txn, err := transactionInstance.GetByUuid(uuid)
+	dbConn := cmd.DbConn
+	_, err := transactionInstance.Retrieve(dbConn, map[string]interface{}{"uuid": uuid})
 
 	if err == nil {
 		goto GenerateNewUUID
 	}
 
-	transaction.Uuid = uuid
-	transaction.CreatedAt = time.Now()
-	transaction.UpdatedAt = time.Now()
+	t.Uuid = uuid
+	t.CreatedAt = time.Now()
+	t.UpdatedAt = time.Now()
 
-	fmt.Println("Transaction------->", transaction)
-	insertQuery := `INSERT INTO transaction (Uuid, Type, Amount, CreatedAt, UpdatedAt) VALUES (:Uuid, :Type, :Amount, :CreatedAt, :UpdatedAt)`
+	insertQuery := `INSERT INTO transaction (uuid, type, amount, created_at, updated_at) VALUES (:uuid, :type, :amount, :created_at, :updated_at)`
 
 	// execute the insert query
-	_, err = cmd.DbConn.NamedExec(insertQuery, &transaction)
+	_, err = cmd.DbConn.NamedExec(insertQuery, &t)
 
 	// if an error is found, return it
 	if err != nil {
 		fmt.Println("Error found while Inserting---->", err)
 	}
 
-	// txn, err := transactionInstance.GetByUuid(uuid)
-
 	if err != nil {
 		fmt.Println("Error getting transaction by uuid----->", err)
 		return nil, err
 	}
-	return txn, nil
-}
-func (transaction *Transaction) Retrieve(uuid string) (*Transaction, error) {
-	txn := make([]*Transaction, 0)
-	// execute the query
-	err := cmd.DbConn.Select(&txn, "SELECT * FROM transaction WHERE Uuid = $1 LIMIT 1", uuid)
-
-	// if an error is found, return it
-	if err != nil {
-		fmt.Println("Error found", err)
-	}
-
-	return txn[0], err
+	return t, nil
 }
 
-func Retrieve(transaction *Transaction, uuid string) (*Transaction, error) {
-	// execute the query
-	err := cmd.DbConn.Get(transaction, "SELECT * FROM transaction WHERE Uuid = $1 LIMIT 1", uuid)
-
-	// if an error is found, return it
-	if err != nil {
-		fmt.Println("Error found", err)
-	}
-
-	return transaction, err
-}
-
-func UpdateTransaction(transaction *Transaction, uuid string) (*Transaction, error) {
-	// transactions := make([]Transaction, 0)
+// UpdateTransaction
+//
+//	@param t
+//	@param uuid
+//	@return *Transaction
+//	@return error
+func UpdateTransaction(t *Transaction, uuid string) (*Transaction, error) {
 
 	updateStmt := `UPDATE transactions SET Amount=:Amount, CreatedAt=:CreatedAt, UpdatedAt=:UpdatedAt,Type=:Type WHERE ID=:ID`
 
 	// update a query in the database
-	_, err := cmd.DbConn.NamedExec(updateStmt, transaction)
+	_, err := cmd.DbConn.NamedExec(updateStmt, t)
 
 	// if an error is found
 	if err != nil {
 		fmt.Println("Error found", err)
 	}
 
-	return transaction, nil
+	return t, nil
 }
 
-func DeleteTransaction(transaction *Transaction, uuid string) (*Transaction, error) {
+// Delete
+//
+//	@receiver t
+//	@param db
+//	@param attributeMap
+//	@return error
+func (t *Transaction) Delete(db *sqlx.DB, attributeMap map[string]interface{}) error {
 
-	deleteStmt := `DELETE FROM transaction WHERE Uuid=$1`
+	query := "DELETE FROM transaction"
+	// Check for id or uuid or status in the attributeMap and construct the WHERE clause
+	whereClause := ""
 
-	// check if the record with this id exists in the transactions table
-	err := cmd.DbConn.Get(&transaction, "SELECT * FROM transaction WHERE Uuid=$1 LIMIT 1", uuid)
-
-	// if an error is found, return it
-	if err != nil {
-		fmt.Println("Error found", err)
+	if id, ok := attributeMap["id"]; ok {
+		whereClause = fmt.Sprintf("id=%d", id)
+	} else if uuid, ok := attributeMap["uuid"]; ok {
+		whereClause = fmt.Sprintf("uuid='%s'", uuid)
+	} else if status, ok := attributeMap["status"]; ok {
+		whereClause = fmt.Sprintf("status='%s'", status)
 	}
-	// execute the delete query
-	_, err = cmd.DbConn.Exec(deleteStmt, uuid)
 
-	// if an error is found, return it
+	//Append the Where clause to the query
+	deleteQuery := query + whereClause
+
+	//Execute the DELETE query
+	result, err := db.Exec(deleteQuery)
+
+	//If an error is found, return it
 	if err != nil {
-		fmt.Println("Error found", err)
+		return err
 	}
 
-	return transaction, nil
+	//Check if any rows were affected
+	rowsAffected, err := result.RowsAffected()
+
+	//If an error is found, return it
+	if err != nil {
+		return err
+	}
+
+	//If no rows were affected, return an error
+	if rowsAffected == 0 {
+		return utils.ErrResourceNotFound
+	}
+	return nil
+}
+
+// Filter
+//
+//	@receiver t
+//	@param db
+//	@param attributeMap
+//	@return []*Transaction
+//	@return error
+func (t *Transaction) Filter(db *sqlx.DB, attributeMap map[string]interface{}) ([]*Transaction, error) {
+
+	whereClause, _ := utils.GenerateQueryWhereClause(attributeMap)
+
+	query := "SELECT amount, type, created_at FROM transaction "
+
+	filteredQuery := query + whereClause
+
+	transactions := make([]*Transaction, 0)
+
+	err := db.Select(&transactions, filteredQuery)
+
+	if err != nil {
+		return nil, err
+	}
+	return transactions, err
 }

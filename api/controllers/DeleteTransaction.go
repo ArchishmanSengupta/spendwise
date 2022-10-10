@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/ArchishmanSengupta/expense-tracker/api/models"
+	"github.com/ArchishmanSengupta/expense-tracker/cmd"
 	"github.com/gorilla/mux"
 )
 
@@ -16,10 +17,12 @@ func DeleteTransaction(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	uuid := params["uuid"]
 
-	// get the request body into the todo struct
+	// Get the DBconn from the main.go
+	dbConn := cmd.DbConn
+	// get the request body into the struct
 	json.NewDecoder(r.Body).Decode(&transactionInstance)
 
-	_, err := models.DeleteTransaction(&transactionInstance, uuid)
+	err := transactionInstance.Delete(dbConn, map[string]interface{}{"uuid": uuid})
 
 	// if an error is found, send it to the client
 	if err != nil {

@@ -18,8 +18,11 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	dbConn, _ := cmd.Connect() // TODO: Error handling here
+	dbConn, err := cmd.Connect()
 
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	cmd.DbConn = dbConn
 
 	api.RegisterRoutes(r)

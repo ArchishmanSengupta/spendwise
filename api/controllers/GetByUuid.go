@@ -2,10 +2,11 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 
 	"github.com/ArchishmanSengupta/expense-tracker/api/models"
+	"github.com/ArchishmanSengupta/expense-tracker/cmd"
 	"github.com/gorilla/mux"
 )
 
@@ -14,15 +15,12 @@ func GetByUuid(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	uuid := params["uuid"]
 
-	// get all transactions
-	// transactions, err := models.GetByUuid(&transaction, uuid)
+	dbConn := cmd.DbConn
 
-	transaction, err := transactionInstance.Retrieve(uuid)
+	transaction, err := transactionInstance.Retrieve(dbConn, map[string]interface{}{"uuid": uuid})
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		log.Fatal(err)
+		fmt.Println("Error found in Controller of GetByUuid---->", err)
 		return
 	}
 

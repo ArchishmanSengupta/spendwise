@@ -9,7 +9,10 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var DbConn *sqlx.DB
+var (
+	// DB The database connection
+	DbConn *sqlx.DB
+)
 
 func Connect() (*sqlx.DB, error) {
 	dbUser := os.Getenv("DB_USER")
