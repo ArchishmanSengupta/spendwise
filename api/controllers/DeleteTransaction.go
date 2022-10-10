@@ -1,12 +1,11 @@
 package controllers
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/ArchishmanSengupta/expense-tracker/api/models"
 	"github.com/ArchishmanSengupta/expense-tracker/cmd"
+	"github.com/ArchishmanSengupta/expense-tracker/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -19,16 +18,21 @@ func DeleteTransaction(w http.ResponseWriter, r *http.Request) {
 
 	// Get the DBconn from the main.go
 	dbConn := cmd.DbConn
-	// get the request body into the struct
-	json.NewDecoder(r.Body).Decode(&transactionInstance)
 
 	err := transactionInstance.Delete(dbConn, map[string]interface{}{"uuid": uuid})
 
-	// if an error is found, send it to the client
 	if err != nil {
-		fmt.Println("Error found", err)
+		switch err {
+		case utils.ErrResourceNotFound:
+			utils.SendError(w, err, http.StatusNotFound)
+		default:
+			utils.SendError(w, err, http.StatusInternalServerError)
+		}
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusNoContent)
+
+	// send response
+	w.Write([]byte(http.StatusText(http.StatusNoContent)))
 }

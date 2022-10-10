@@ -17,6 +17,8 @@ func GenerateQueryWhereClause(attributeMap map[string]interface{}) (string, erro
 	}
 	creditOrDebit := attributeMap["type"]
 	date := attributeMap["date"]
+	amount := attributeMap["amount"]
+
 	paramCount := 0
 	condition := ""
 
@@ -25,10 +27,18 @@ func GenerateQueryWhereClause(attributeMap map[string]interface{}) (string, erro
 		paramCount++
 	}
 
+	if amount != nil {
+		if paramCount > 0 {
+			condition = condition + "AND "
+		}
+		condition = condition + fmt.Sprintf(`amount = %s `, amount)
+		paramCount++
+	}
+
 	if date != nil {
 		and := ""
 		if paramCount > 0 {
-			and = "AND"
+			and = "AND "
 		}
 		condition = condition + and + fmt.Sprintf(`DATE(created_at)='%s'`, date)
 	}

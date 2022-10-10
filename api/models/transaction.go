@@ -157,7 +157,7 @@ func UpdateTransaction(t *Transaction, uuid string) (*Transaction, error) {
 //	@return error
 func (t *Transaction) Delete(db *sqlx.DB, attributeMap map[string]interface{}) error {
 
-	query := "DELETE FROM transaction"
+	query := "DELETE FROM transaction WHERE "
 	// Check for id or uuid or status in the attributeMap and construct the WHERE clause
 	whereClause := ""
 
@@ -209,6 +209,8 @@ func (t *Transaction) Filter(db *sqlx.DB, attributeMap map[string]interface{}) (
 	query := "SELECT amount, type, created_at FROM transaction "
 
 	filteredQuery := query + whereClause
+
+	fmt.Println("Filtered Query----->", filteredQuery)
 
 	transactions := make([]*Transaction, 0)
 
