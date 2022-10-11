@@ -53,11 +53,10 @@ func TestMain(m *testing.M) {
 
 	// Close test server
 	Server.Close()
+	utils.ClearTestDatabase(dbConn)
 
 	// Close test database connection
 	_ = dbConn.Close()
-
-	utils.ClearTestDatabase(dbConn)
 
 	// Exit main test
 	os.Exit(exitVal)
