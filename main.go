@@ -1,3 +1,9 @@
+/******************************************************
+ *       THIS FILE IS THE MAIN EXECUTABLE FILE.       *
+ * IT CONNECTS TO THE DATABASE AND STARTS THE SERVER. *
+ *    THE REGISTER ROUTES THEN ASSIGNS THE ROUTES.     *
+ ******************************************************/
+
 package main
 
 import (
@@ -12,8 +18,8 @@ import (
 
 func main() {
 	r := mux.NewRouter()
-
 	err := godotenv.Load(".env")
+
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -24,7 +30,6 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	cmd.DbConn = dbConn
-
 	api.RegisterRoutes(r)
 
 	log.Println("Starting up the server")

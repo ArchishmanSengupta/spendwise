@@ -1,6 +1,6 @@
-/**
-* This file holds the logic for the transaction table
- */
+/*******************************************************
+ * THIS FILE HOLDS THE LOGIC FOR THE TRANSACTION TABLE *
+ *******************************************************/
 
 package models
 
@@ -36,12 +36,12 @@ type Transaction struct {
 /*
 * This function returns all the transactions in the ElephantSQL database
 
-@receiver t
+* @receiver t
 * @param typeFromTheUrl
 * @param dateFromTheUrl
-@return []*Transaction
-@return error
-*/
+* @return []*Transaction
+* @return error
+ */
 func (t *Transaction) GetAllTransactions(typeFromTheUrl string, dateFromTheUrl string) ([]*Transaction, error) {
 	transactions := make([]*Transaction, 0)
 
@@ -55,16 +55,18 @@ func (t *Transaction) GetAllTransactions(typeFromTheUrl string, dateFromTheUrl s
 	return transactions, nil
 }
 
-// Retrieve
-//  @receiver t
-//  @param db
-//  @param attributeMap
-//  @return *Transaction
-//  @return error
-
+/*
+*This Retrieve Method is used to retrieve a transaction from the database based on the attributeMap passed
+ * @receiver t
+ * @param db
+ * @param attributeMap
+ * @return *Transaction
+ * @return error
+*/
 func (t *Transaction) Retrieve(db *sqlx.DB, attributeMap map[string]interface{}) (*Transaction, error) {
 
 	query := "SELECT amount, type, created_at, updated_at FROM transaction"
+
 	// Check for id or uuid in the attributeMap and construct the WHERE clause
 	whereClause := ""
 	if id, ok := attributeMap["id"]; ok {
@@ -128,12 +130,14 @@ GenerateNewUUID:
 	return t, nil
 }
 
-// UpdateTransaction
-//
-//	@param t
-//	@param uuid
-//	@return *Transaction
-//	@return error
+/*
+* This UpdateTransaction filter is used to update a transaction
+
+  - @param t
+  - @param uuid
+  - @return *Transaction
+  - @return error
+*/
 func UpdateTransaction(t *Transaction, uuid string) (*Transaction, error) {
 
 	updateStmt := `UPDATE transactions SET Amount=:Amount, CreatedAt=:CreatedAt, UpdatedAt=:UpdatedAt,Type=:Type WHERE ID=:ID`
@@ -149,12 +153,14 @@ func UpdateTransaction(t *Transaction, uuid string) (*Transaction, error) {
 	return t, nil
 }
 
-// Delete
-//
-//	@receiver t
-//	@param db
-//	@param attributeMap
-//	@return error
+/*
+This Delete Method is to delete a transaction from the database based on the uuid.
+
+	@receiver t
+	@param db
+	@param attributeMap
+	@return error
+*/
 func (t *Transaction) Delete(db *sqlx.DB, attributeMap map[string]interface{}) error {
 
 	query := "DELETE FROM transaction WHERE "
@@ -195,13 +201,17 @@ func (t *Transaction) Delete(db *sqlx.DB, attributeMap map[string]interface{}) e
 	return nil
 }
 
-// Filter
-//
-//	@receiver t
-//	@param db
-//	@param attributeMap
-//	@return []*Transaction
-//	@return error
+/*
+* This Filter Method is to filter out the query based on the type , amount and date
+
+	@receiver t
+	@param db
+	@param attributeMap
+	@return []*Transaction
+	@return error
+*/
+// Filter : This method is used to filter the transactions based on the type, amount and date
+//        param -  attributeMap
 func (t *Transaction) Filter(db *sqlx.DB, attributeMap map[string]interface{}) ([]*Transaction, error) {
 
 	whereClause, _ := utils.GenerateQueryWhereClause(attributeMap)
@@ -209,8 +219,6 @@ func (t *Transaction) Filter(db *sqlx.DB, attributeMap map[string]interface{}) (
 	query := "SELECT amount, type, created_at FROM transaction "
 
 	filteredQuery := query + whereClause
-
-	fmt.Println("Filtered Query----->", filteredQuery)
 
 	transactions := make([]*Transaction, 0)
 

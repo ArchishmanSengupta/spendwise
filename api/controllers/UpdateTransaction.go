@@ -1,8 +1,10 @@
+/****************************************************************
+ * THIS FILE IS THE CONTROLLER FOR THE UPDATING THE TRANSACTION *
+ ****************************************************************/
 package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/ArchishmanSengupta/expense-tracker/api/models"
@@ -23,7 +25,7 @@ func UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 
 	// if an error is found, send it to the client
 	if err != nil {
-		fmt.Println("Error found", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	w.Header().Set("Content-Type", "application/json")

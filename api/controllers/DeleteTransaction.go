@@ -1,3 +1,6 @@
+/*******************************************************
+ * THIS FILE IS THE CONTROLLER OF THE DELETE OPERATION *
+ *******************************************************/
 package controllers
 
 import (

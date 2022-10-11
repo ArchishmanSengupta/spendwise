@@ -1,3 +1,6 @@
+/*****************************************************
+ * THIS FILE IS THE CONTROLLER OF GET ALL TRANSACTIONS *
+ *****************************************************/
 package controllers
 
 import (
@@ -12,9 +15,9 @@ import (
 func GetAllTransactions(w http.ResponseWriter, r *http.Request) {
 	transactionInstance := models.Transaction{}
 
-	typeFromTheUrl := r.URL.Query().Get("type")     //check if type is empty
-	dateFromTheUrl := r.URL.Query().Get("date")     //check if type is empty
-	amountFromTheUrl := r.URL.Query().Get("amount") //check if type is empty
+	typeFromTheUrl := r.URL.Query().Get("type")
+	dateFromTheUrl := r.URL.Query().Get("date")
+	amountFromTheUrl := r.URL.Query().Get("amount")
 
 	attributeMap := make(map[string]interface{}, 0)
 

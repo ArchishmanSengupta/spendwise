@@ -1,3 +1,7 @@
+/*********************************************************
+ * THIS FILE IS THE CONTROLLER OF THE CREATE TRANSACTION *
+ *********************************************************/
+
 package controllers
 
 import (

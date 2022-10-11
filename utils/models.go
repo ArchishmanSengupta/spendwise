@@ -7,10 +7,22 @@ import (
 	"github.com/google/uuid"
 )
 
+/*
+	This CreateNewUUID Function is used to create a new UUID
+
+@return string
+*/
 func CreateNewUUID() string {
 	return uuid.New().String()
 }
 
+/*
+	This GenerateQueryWhereClause Function is used to generate the query where clause based on the attributeMap passed
+
+@param attributeMap
+@return string
+@return error
+*/
 func GenerateQueryWhereClause(attributeMap map[string]interface{}) (string, error) {
 	if len(attributeMap) == 0 {
 		return "", errors.New("empty attribute map")
@@ -45,3 +57,9 @@ func GenerateQueryWhereClause(attributeMap map[string]interface{}) (string, erro
 	whereClause := fmt.Sprintf(`WHERE %s`, condition)
 	return whereClause, nil
 }
+
+// Add Model Manager for transactions
+// 		- Add a new transaction
+// 		- Get a transaction by id
+// 		- Get a transaction by uuid
+// 		- Get a transaction by status

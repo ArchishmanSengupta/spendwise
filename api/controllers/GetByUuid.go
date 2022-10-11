@@ -1,3 +1,7 @@
+/*******************************************************************************************
+ *     THIS FILE IS THE CONTROLLER FOR GETTING TRANSACTION RESPONSE BASED ON THE UUID.     *
+ * THIS CONTROLLER WILL BE CALLED WHEN THE USER HITS THE ENDPOINT /API/TRANSACTIONS/{UUID} *
+ *******************************************************************************************/
 package controllers
 
 import (

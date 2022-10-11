@@ -1,3 +1,8 @@
+/*********************************************************************
+ *       THIS FILE HOLDS THE SERIALIZERS OF THE TRANSACTIONS.        *
+ * IT IS USED TO SERIALIZE THE DATA BEFORE SENDING IT TO THE CLIENT. *
+ *********************************************************************/
+
 package serializers
 
 import "github.com/ArchishmanSengupta/expense-tracker/api/models"
