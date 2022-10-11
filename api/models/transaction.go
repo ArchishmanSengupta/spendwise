@@ -57,11 +57,11 @@ func (t *Transaction) GetAllTransactions(typeFromTheUrl string, dateFromTheUrl s
 
 /*
 *This Retrieve Method is used to retrieve a transaction from the database based on the attributeMap passed
- * @receiver t
- * @param db
- * @param attributeMap
- * @return *Transaction
- * @return error
+receiver t
+param - datavbASE
+param attributeMap
+return *Transaction
+return error
 */
 func (t *Transaction) Retrieve(db *sqlx.DB, attributeMap map[string]interface{}) (*Transaction, error) {
 

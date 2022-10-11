@@ -57,9 +57,3 @@ func GenerateQueryWhereClause(attributeMap map[string]interface{}) (string, erro
 	whereClause := fmt.Sprintf(`WHERE %s`, condition)
 	return whereClause, nil
 }
-
-// Add Model Manager for transactions
-// 		- Add a new transaction
-// 		- Get a transaction by id
-// 		- Get a transaction by uuid
-// 		- Get a transaction by status
