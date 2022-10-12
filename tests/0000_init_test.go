@@ -39,7 +39,6 @@ func TestMain(m *testing.M) {
 		return
 	}
 	utils.ClearTestDatabase(dbConn)
-
 	// Initialize new router for test
 	router := mux.NewRouter()
 
