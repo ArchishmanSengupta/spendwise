@@ -11,6 +11,6 @@ func RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/transactions", controllers.GetAllTransactions).Methods("GET")
 	r.HandleFunc("/transactions", controllers.CreateTransaction).Methods("POST")
 	r.HandleFunc("/transactions/{uuid}", controllers.GetByUuid).Methods("GET")
-	r.HandleFunc("/transactions/{uuid}", controllers.UpdateTransaction).Methods("PUT")
+	r.HandleFunc("/transactions/{id}", controllers.UpdateTransaction).Methods("PUT")
 	r.HandleFunc("/transactions/{uuid}", controllers.DeleteTransaction).Methods("DELETE")
 }

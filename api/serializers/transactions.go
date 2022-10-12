@@ -18,10 +18,10 @@ func (serializer *TransactionSerializer) Serialize() map[string]interface{} {
 	transactionsArray := make([]interface{}, 0)
 	for _, transaction := range serializer.Transactions {
 		transactionsArray = append(transactionsArray, map[string]interface{}{
-			"type":      transaction.Type,
-			"amount":    transaction.Amount,
-			"createdat": transaction.CreatedAt,
-			"updatedat": transaction.UpdatedAt,
+			"type":       transaction.Type,
+			"amount":     transaction.Amount,
+			"created_at": transaction.CreatedAt,
+			"updated_at": transaction.UpdatedAt,
 		})
 	}
 

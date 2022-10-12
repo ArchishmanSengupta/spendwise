@@ -58,26 +58,25 @@ func (t *Transaction) GetAllTransactions(typeFromTheUrl string, dateFromTheUrl s
 /*
 *This Retrieve Method is used to retrieve a transaction from the database based on the attributeMap passed
 receiver t
-param - datavbASE
+param - database
 param attributeMap
 return *Transaction
 return error
 */
 func (t *Transaction) Retrieve(db *sqlx.DB, attributeMap map[string]interface{}) (*Transaction, error) {
 
-	query := "SELECT amount, type, created_at, updated_at FROM transaction"
+	query := `SELECT amount, type, created_at, updated_at FROM transaction WHERE `
 
 	// Check for id or uuid in the attributeMap and construct the WHERE clause
 	whereClause := ""
 	if id, ok := attributeMap["id"]; ok {
-		whereClause = fmt.Sprintf("WHERE id='%d'", id)
+		whereClause = fmt.Sprintf("id='%d'", id)
 	} else if uuid, ok := attributeMap["uuid"]; ok {
-		whereClause = fmt.Sprintf("WHERE uuid='%s'", uuid)
+		whereClause = fmt.Sprintf("uuid='%s'", uuid)
 	}
 
 	// Append the WHERE clause to the query
-	query = fmt.Sprintf(query, whereClause)
-
+	query += whereClause
 	// Execute Get operation on the scan table
 	err := db.Get(t, query)
 	if err != nil {
@@ -121,12 +120,13 @@ GenerateNewUUID:
 	// if an error is found, return it
 	if err != nil {
 		fmt.Println("Error found while Inserting---->", err)
-	}
-
-	if err != nil {
-		fmt.Println("Error getting transaction by uuid----->", err)
 		return nil, err
 	}
+
+	//! if err != nil {
+	// 	fmt.Println("Error getting transaction by uuid----->", err)
+	// 	return nil, err
+	// }
 	return t, nil
 }
 
@@ -138,29 +138,42 @@ GenerateNewUUID:
   - @return *Transaction
   - @return error
 */
-func UpdateTransaction(t *Transaction, uuid string) (*Transaction, error) {
+func (t *Transaction) UpdateTransaction(db *sqlx.DB, attributeMap map[string]interface{}) (*Transaction, error) {
 
-	updateStmt := `UPDATE transactions SET Amount=:Amount, CreatedAt=:CreatedAt, UpdatedAt=:UpdatedAt,Type=:Type WHERE ID=:ID`
+	t.UpdatedAt = time.Now()
 
+	query := `UPDATE transaction SET amount=:amount,type=:type `
+	whereClause := ""
+	if id, ok := attributeMap["id"]; ok {
+		whereClause = fmt.Sprintf("WHERE id='%d'", id)
+	} else if uuid, ok := attributeMap["uuid"]; ok {
+		whereClause = fmt.Sprintf("WHERE uuid='%s'", uuid)
+	}
+
+	// Append the WHERE clause to the query
+	query += whereClause
 	// update a query in the database
-	_, err := cmd.DbConn.NamedExec(updateStmt, t)
+	_, err := cmd.DbConn.NamedExec(query, t)
 
 	// if an error is found
 	if err != nil {
-		fmt.Println("Error found", err)
+		switch err {
+		case sql.ErrNoRows:
+			return nil, utils.ErrResourceNotFound
+		default:
+			return nil, err
+		}
 	}
 
 	return t, nil
 }
 
-/*
-This Delete Method is to delete a transaction from the database based on the uuid.
+// This Delete Method is to delete a transaction from the database based on the uuid.
 
-	@receiver t
-	@param db
-	@param attributeMap
-	@return error
-*/
+// @receiver t
+// @param db
+// @param attributeMap
+// @return error
 func (t *Transaction) Delete(db *sqlx.DB, attributeMap map[string]interface{}) error {
 
 	query := "DELETE FROM transaction WHERE "
@@ -201,17 +214,13 @@ func (t *Transaction) Delete(db *sqlx.DB, attributeMap map[string]interface{}) e
 	return nil
 }
 
-/*
-* This Filter Method is to filter out the query based on the type , amount and date
+//This Filter Method is to filter out the query based on the type , amount and date
 
-	@receiver t
-	@param db
-	@param attributeMap
-	@return []*Transaction
-	@return error
-*/
-// Filter : This method is used to filter the transactions based on the type, amount and date
-//        param -  attributeMap
+// @receiver t
+// @param db
+// @param attributeMap
+// @return []*Transaction
+// @return error
 func (t *Transaction) Filter(db *sqlx.DB, attributeMap map[string]interface{}) ([]*Transaction, error) {
 
 	whereClause, _ := utils.GenerateQueryWhereClause(attributeMap)

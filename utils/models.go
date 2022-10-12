@@ -7,22 +7,19 @@ import (
 	"github.com/google/uuid"
 )
 
-/*
-	This CreateNewUUID Function is used to create a new UUID
-
-@return string
-*/
+// This CreateNewUUID Function is used to create a new UUID
+// CreateNewUUID
+//
+//	@return string
 func CreateNewUUID() string {
 	return uuid.New().String()
 }
 
-/*
-	This GenerateQueryWhereClause Function is used to generate the query where clause based on the attributeMap passed
-
-@param attributeMap
-@return string
-@return error
-*/
+// GenerateQueryWhereClause This GenerateQueryWhereClause Function is used to generate the query where clause based on the attributeMap passed
+//
+//	@param attributeMap
+//	@return string
+//	@return error
 func GenerateQueryWhereClause(attributeMap map[string]interface{}) (string, error) {
 	if len(attributeMap) == 0 {
 		return "", errors.New("empty attribute map")

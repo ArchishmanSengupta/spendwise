@@ -6,7 +6,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"net/http"
 
 	"github.com/ArchishmanSengupta/expense-tracker/api/models"
@@ -19,11 +19,10 @@ func CreateTransaction(w http.ResponseWriter, r *http.Request) {
 	transactionInstance := models.Transaction{}
 	json.NewDecoder(r.Body).Decode(&transactionInstance)
 
-	if transactionInstance.Amount < 0 {
-		fmt.Println("Amount cannot be negative")
+	if transactionInstance.Amount == 0 || transactionInstance.Type == "" || transactionInstance.Amount < 0 {
+		utils.SendError(w, errors.New("Missing Fields"), http.StatusBadRequest)
 		return
 	}
-
 	transaction, err := transactionInstance.Insert()
 
 	if err != nil {
