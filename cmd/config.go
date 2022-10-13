@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -22,8 +21,6 @@ func Connect() (*sqlx.DB, error) {
 
 	// Generating databaseUrl & not fetching the URL from the .env file
 	databaseUrl := "postgres://" + dbUser + ":" + dbPass + "@" + dbServer + "/" + dbName
-
-	fmt.Println(databaseUrl)
 	db, err := sqlx.Connect("postgres", databaseUrl)
 
 	if err != nil {

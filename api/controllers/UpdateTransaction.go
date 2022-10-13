@@ -5,8 +5,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -18,6 +16,7 @@ import (
 )
 
 func UpdateTransaction(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	transactionInstance := models.Transaction{}
 
 	// get the slug with the name "id"
@@ -26,11 +25,6 @@ func UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 
 	//Convert String id to int
 	id, _ := strconv.Atoi(idStr)
-
-	if transactionInstance.Amount == 0 || transactionInstance.Amount < 0 || transactionInstance.Type == "" {
-		utils.SendError(w, errors.New("Missing fields"), http.StatusBadRequest)
-		return
-	}
 
 	//get transaction with this id first
 	transactionRecord, err := transactionInstance.Retrieve(cmd.DbConn, map[string]interface{}{"id": id})
@@ -48,7 +42,19 @@ func UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 	// get the request body into the transaction struct
 	json.NewDecoder(r.Body).Decode(&transactionInstance)
+	var errors = make(map[string]string)
 
+	if transactionInstance.Amount == 0 {
+		errors["amount"] = "Amount is required, and must be greater than 0"
+	}
+	if transactionInstance.Type == "" {
+		errors["type"] = "Type is required"
+	}
+
+	if len(errors) > 0 {
+		utils.SendError(w, errors, http.StatusBadRequest)
+		return
+	}
 	transactionRecord.Amount = transactionInstance.Amount
 	transactionRecord.Type = transactionInstance.Type
 	_, err = transactionRecord.UpdateTransaction(cmd.DbConn, map[string]interface{}{"id": id})
@@ -68,9 +74,6 @@ func UpdateTransaction(w http.ResponseWriter, r *http.Request) {
 		Transactions: []*models.Transaction{transactionRecord},
 		Many:         false,
 	}
-	fmt.Println("Transaction Serialization---->", transactionSerializer.Serialize())
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 
 	responseMap := map[string]interface{}{
 		"status_code": "success",

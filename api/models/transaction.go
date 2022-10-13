@@ -33,6 +33,8 @@ type Transaction struct {
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
 
+var TotalTransactionCount int
+
 /*
 * This function returns all the transactions in the ElephantSQL database
 
@@ -42,11 +44,15 @@ type Transaction struct {
 * @return []*Transaction
 * @return error
  */
-func (t *Transaction) GetAllTransactions(typeFromTheUrl string, dateFromTheUrl string) ([]*Transaction, error) {
+func (t *Transaction) GetAllTransactions(typeFromTheUrl string, dateFromTheUrl string, limit int, offset int, db *sqlx.DB) ([]*Transaction, error) {
 	transactions := make([]*Transaction, 0)
 
 	// execute the select query
-	err := cmd.DbConn.Select(&transactions, "SELECT amount,type,created_at, updated_at FROM transaction")
+	err := cmd.DbConn.Select(&transactions, "SELECT amount,type,created_at, updated_at FROM transaction ORDER BY id LIMIT $1 OFFSET $2", limit, offset)
+
+	totalRecordsCountQuery := `SELECT COUNT(*) FROM transaction`
+
+	err = db.QueryRowx(totalRecordsCountQuery).Scan(&TotalTransactionCount)
 
 	// if an error is found, return that error
 	if err != nil {
@@ -123,10 +129,6 @@ GenerateNewUUID:
 		return nil, err
 	}
 
-	//! if err != nil {
-	// 	fmt.Println("Error getting transaction by uuid----->", err)
-	// 	return nil, err
-	// }
 	return t, nil
 }
 
@@ -221,18 +223,34 @@ func (t *Transaction) Delete(db *sqlx.DB, attributeMap map[string]interface{}) e
 // @param attributeMap
 // @return []*Transaction
 // @return error
-func (t *Transaction) Filter(db *sqlx.DB, attributeMap map[string]interface{}) ([]*Transaction, error) {
+func (t *Transaction) Filter(db *sqlx.DB, attributeMap map[string]interface{}, limit, offset int) ([]*Transaction, error) {
 
-	whereClause, _ := utils.GenerateQueryWhereClause(attributeMap)
+	whereClause, err := utils.GenerateQueryWhereClause(attributeMap)
+	// if any error found in generating the where clause
+	if err != nil {
+		return nil, err
 
+	}
 	query := "SELECT amount, type, created_at FROM transaction "
 
-	filteredQuery := query + whereClause
+	filteredQuery := query + whereClause + "LIMIT $1 OFFSET $2"
 
 	transactions := make([]*Transaction, 0)
 
-	err := db.Select(&transactions, filteredQuery)
+	err = db.Select(&transactions, filteredQuery, limit, offset)
 
+	// if an error is found, return that erorr
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, utils.ErrResourceNotFound
+		default:
+			return nil, err
+		}
+	}
+	totalRecordsCountQuery := `SELECT COUNT(*) FROM transaction`
+
+	err = db.QueryRowx(totalRecordsCountQuery).Scan(&TotalTransactionCount)
 	if err != nil {
 		return nil, err
 	}

@@ -4,6 +4,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/ArchishmanSengupta/expense-tracker/api/models"
@@ -13,6 +14,7 @@ import (
 )
 
 func DeleteTransaction(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	transactionInstance := models.Transaction{}
 
 	// get the slug with the name "id"
@@ -27,15 +29,19 @@ func DeleteTransaction(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case utils.ErrResourceNotFound:
-			utils.SendError(w, err, http.StatusNotFound)
+			utils.SendError(w, nil, http.StatusNotFound)
 		default:
-			utils.SendError(w, err, http.StatusInternalServerError)
+			utils.LogError(r, err.Error())
+			utils.SendError(w, nil, http.StatusInternalServerError)
 		}
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	response := map[string]interface{}{
+		"uuid":   uuid,
+		"object": "transaction",
+		"delete": true,
+	}
 
-	// send response
-	w.Write([]byte(http.StatusText(http.StatusNoContent)))
+	_ = json.NewEncoder(w).Encode(response)
 }
